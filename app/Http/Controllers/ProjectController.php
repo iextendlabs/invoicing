@@ -52,22 +52,21 @@ class ProjectController extends Controller
         // detail information about the project
         $projectInfo    = Project::find($projectId);
         $tasks          = $projectInfo->task;
-        
         $paidHours      = $this->paidHours($tasks);
-        
+
         $unPaidHours    = $this->unPaidHours($tasks);
-        
+
+
+
         $paid = 0;
         foreach ($tasks as $task) {
             $paid += $this->timeToSeconds($task->totalHours);
         }
         $hours =  $this->secondsToTime($paid);
 
-        $logsPayment    =  str_replace(':', '.', $paidHours) * $projectInfo->per_hour_rate;
-
-        $dueCharges     = str_replace(':', '.', $unPaidHours) * $projectInfo->per_hour_rate;
-
-        $totalCost      = str_replace(":", ".", $hours) * $projectInfo->per_hour_rate;
+        $logsPayment    =  $this->timeToDecimalHours($paidHours) * $projectInfo->per_hour_rate;
+        $dueCharges     = $this->timeToDecimalHours($unPaidHours) * $projectInfo->per_hour_rate;
+        $totalCost      = $this->timeToDecimalHours($hours) * $projectInfo->per_hour_rate;
         return view('admin.project.projectView', [
             'projectInfo' => $projectInfo,
             'totalCost' => $totalCost,
@@ -217,7 +216,6 @@ class ProjectController extends Controller
                 // $index++;
             }
         }
-
         return $this->totalTimeSpend($arr);
     }
 
@@ -232,7 +230,6 @@ class ProjectController extends Controller
     public function totalTimeSpend($time)
     {
         $total = 0;
-
         // Loop the data items
         foreach ($time as $element) {
             // Explode by separator :
@@ -249,7 +246,6 @@ class ProjectController extends Controller
             // Add the seconds to total
             // $total += (int) $temp[2];
         }
-
         // Format the seconds back into HH:MM:SS
         $formatted = sprintf(
             '%02d:%02d',
@@ -257,7 +253,6 @@ class ProjectController extends Controller
             ($total / 60 % 60),
             $total % 60
         );
-
         return $formatted;
     }
 
@@ -303,7 +298,6 @@ class ProjectController extends Controller
         foreach ($invoices as $invoice) {
             $project_name = $invoice['project_name'];
         }
-
         return view('admin.invoice.invoice', ['invoices' => $invoices, 'project_name' => $project_name, 'projectID' => $request->get('id')]);
     }
 
@@ -311,13 +305,18 @@ class ProjectController extends Controller
     {
         $invoice = Invoice::find($request->get('id'));
         $project   = Project::find($request->get('projectId'));
-        
         return view('admin.invoice.invoiceDetail', ['invoice' => $invoice, 'project' => $project]);
     }
 
-    public function timeToSeconds($time) {
-        list($hours, $minutes, $seconds) = explode(':', $time);
-        return $hours * 3600 + $minutes * 60 + $seconds;
+    public function timeToSeconds($time)
+    {
+        $parts = explode(':', $time);
+        // Assign hours, minutes, and seconds, defaulting to 0 if not present
+        $hours = isset($parts[0]) ? $parts[0] : 0;
+        $minutes = isset($parts[1]) ? $parts[1] : 0;
+        $seconds = isset($parts[2]) ? $parts[2] : 0; // Default to 0 if seconds are not provided
+        // Convert to seconds
+        return ($hours * 3600) + ($minutes * 60) + $seconds;
     }
 
     public function secondsToTime($seconds)
@@ -325,5 +324,19 @@ class ProjectController extends Controller
         $hours = floor($seconds / 3600);
         $minutes = floor(($seconds / 60) % 60);
         return sprintf('%02d:%02d', $hours, $minutes,);
+    }
+
+    public function timeToDecimalHours($time) {
+        $parts = explode(':', $time);
+        // Assign hours and minutes, defaulting to 0 if not present
+        $hours = isset($parts[0]) ? (int)$parts[0] : 0;
+        $minutes = isset($parts[1]) ? (int)$parts[1] : 0;
+        $second = isset($parts[2]) ? (int)$parts[2] : 0;
+        
+        // Convert minutes to decimal hours
+        $decimalHours = $hours + ($minutes / 60) + ($minutes / 3600);
+        $formattedDecimalHours = number_format($decimalHours, 2);
+        
+        return $formattedDecimalHours;
     }
 }

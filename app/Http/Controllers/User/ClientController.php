@@ -57,11 +57,13 @@ class ClientController extends Controller
                 $paid += $this->timeToSeconds($task->totalHours);
             }
             $hours =  $this->secondsToTime($paid);
-            $logsPayment    =  str_replace(':', '.', $paidHours) * $projectInfo->per_hour_rate;
+            
+            $logsPayment    =  $this->timeToDecimalHours( $paidHours) * $projectInfo->per_hour_rate;
+            // $logsPayment    =  str_replace(':', '.', $paidHours) * $projectInfo->per_hour_rate;
 
-            $dueCharges     = str_replace(':', '.', $unPaidHours) * $projectInfo->per_hour_rate;
+            $dueCharges     = $this->timeToDecimalHours( $unPaidHours) * $projectInfo->per_hour_rate;
 
-            $totalCost      = str_replace(":", ".", $hours) * $projectInfo->per_hour_rate;
+            $totalCost      = $this->timeToDecimalHours( $hours) * $projectInfo->per_hour_rate;
 
             $projects_total[$key]['logsPayment'] = $logsPayment;
             $projects_total[$key]['dueCharges'] = $dueCharges;
@@ -259,5 +261,19 @@ class ClientController extends Controller
         $hours = floor($seconds / 3600);
         $minutes = floor(($seconds / 60) % 60);
         return sprintf('%02d:%02d', $hours, $minutes,);
+    }
+
+    public function timeToDecimalHours($time) {
+        $parts = explode(':', $time);
+        // Assign hours and minutes, defaulting to 0 if not present
+        $hours = isset($parts[0]) ? (int)$parts[0] : 0;
+        $minutes = isset($parts[1]) ? (int)$parts[1] : 0;
+        $second = isset($parts[2]) ? (int)$parts[2] : 0;
+        
+        // Convert minutes to decimal hours
+        $decimalHours = $hours + ($minutes / 60) + ($minutes / 3600);
+        $formattedDecimalHours = number_format($decimalHours, 2);
+        
+        return $formattedDecimalHours;
     }
 }

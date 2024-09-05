@@ -116,7 +116,7 @@ class TaskLogController extends Controller
             array_push($logDifference, $this->calculateDifference($startTime, $finishTime));
         }
 
-        $taskTotalCost =  str_replace(":", ".", $hours) * $task->project->per_hour_rate;
+        $taskTotalCost =  $this->timeToDecimalHours($hours) * $task->project->per_hour_rate;
         return view('admin.logDetails', ['task' => $task, 'taskLog' => $taskLog, 'hours' => $hours, 'taskTotalCost' => $taskTotalCost, 'logDifference' => $logDifference, 'per_hour_rate' => $task->project->per_hour_rate, 'pendingLogs' => $pendingLogs, 'completedLogs' => $completedLogs]);
     }
 
@@ -215,44 +215,56 @@ class TaskLogController extends Controller
             return redirect(url()->previous());
         }
         // log update
-        $logUpdate = TaskLog::where('id', $request->logID)->update([
+        $task_Log  = TaskLog::find($request->logID);
+        $previousLogDifference = $this->calculateDifference($task_Log->start_time, $task_Log->end_time);
+        $previousLogDifferenceSec = $this->timeToSeconds($previousLogDifference);
+        $logUpdate = $task_Log->update([
             'user_id'    => $request->developerName,
             'start_time' => $request->starttime,
             'end_time'   => $request->endtime,
             'log_status' => $request->logStatus,
             'log_creation_date' => $request->date,
         ]);
-
+        
         $taskID     = TaskLog::where('id', $request->logID)->pluck('task_id');
         $projectID  = Task::find($taskID[0])->project->id;
 
 
         if ($logUpdate) {
+
             $logDifference = $this->calculateDifference($request->starttime, $request->endtime);
             $logDifferenceInSeconds = $this->timeToSeconds($logDifference);
             $task = Task::find($taskID[0]);
-
             $unPaidLogsInSeconds = $this->timeToSeconds($task->unPaidLogs);
             $paidLogsInSeconds = $this->timeToSeconds($task->paidLogs);
 
             if ($request->logStatus == "pending") {
-                $totalUnpaidSeconds = $unPaidLogsInSeconds + $logDifferenceInSeconds;
-                $task->unPaidLogs = $this->secondsToTime($totalUnpaidSeconds);
-                $task->totalHours = $this->secondsToTime($this->timeToSeconds($task->unPaidLogs) + $paidLogsInSeconds);
+                if ($unPaidLogsInSeconds == 0){
+                    $totalUnpaidSeconds = $unPaidLogsInSeconds  + $logDifferenceInSeconds;
+                    $task->unPaidLogs = $this->secondsToTime($totalUnpaidSeconds);    
+                } else {
+                    $totalUnpaidSeconds = $unPaidLogsInSeconds - $previousLogDifferenceSec + $logDifferenceInSeconds;
+                    $task->unPaidLogs = $this->secondsToTime($totalUnpaidSeconds);
+                }
+
+                $task->totalHours = $this->secondsToTime($totalUnpaidSeconds + $paidLogsInSeconds);
             } elseif ($request->logStatus == "complete") {
-                $totalPaidSeconds = $paidLogsInSeconds + $logDifferenceInSeconds;
-                $task->paidLogs = $this->secondsToTime($totalPaidSeconds);
-                $task->totalHours = $this->secondsToTime($this->timeToSeconds($task->paidLogs) + $unPaidLogsInSeconds);
+                if ($unPaidLogsInSeconds == 0){
+                    $totalUnpaidSeconds = $unPaidLogsInSeconds  + $logDifferenceInSeconds;
+                    $task->unPaidLogs = $this->secondsToTime($totalUnpaidSeconds);    
+                } else {
+                    $totalUnpaidSeconds = $unPaidLogsInSeconds - $previousLogDifferenceSec + $logDifferenceInSeconds;
+                    $task->unPaidLogs = $this->secondsToTime($totalUnpaidSeconds);
+                }
+
+                $task->totalHours = $this->secondsToTime($totalUnpaidSeconds + $unPaidLogsInSeconds);
             }
+
             $task->save();
-            $request->session()->flash('success', 'Log Updated Succesfully');
 
-            return redirect()->action(
-                [ProjectController::class, 'viewProject'],
-                ['id' => $projectID]
-            );
-
-            // return redirect()->route('explore-task/logs', ['task_id' => $taskID[0]]);
+            // Flash a success message and redirect
+            $request->session()->flash('success', 'Log Updated Successfully');
+            return redirect()->action([ProjectController::class, 'viewProject'], ['id' => $projectID]);
         }
     }
 
@@ -286,5 +298,20 @@ class TaskLogController extends Controller
         $minutes = floor(($seconds / 60) % 60);
         $seconds = $seconds % 60;
         return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+    }
+
+    public function timeToDecimalHours($time)
+    {
+        $parts = explode(':', $time);
+
+        // Assign hours and minutes, defaulting to 0 if not present
+        $hours = isset($parts[0]) ? (int)$parts[0] : 0;
+        $minutes = isset($parts[1]) ? (int)$parts[1] : 0;
+        $second = isset($parts[2]) ? (int)$parts[2] : 0;
+
+        // Convert minutes to decimal hours
+        $decimalHours = $hours + ($minutes / 60);
+
+        return $decimalHours;
     }
 }

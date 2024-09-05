@@ -157,11 +157,14 @@ class InvoiceController extends Controller
         $projectHours = $obj->totalTimeSpend($taskHours);
         $projectHours = strtotime($projectHours) - strtotime('TODAY');
         $calculatedHours = ($amount / $project->per_hour_rate) * 3600;
-
+        $totalHours = $calculatedHours;
+        // dd($calculatedHours);
+        // dd($this->secondsToTime($totalHours));
         foreach ($tasks as $key => $task) {
             $unpaidSeconds = strtotime($task->unPaidLogs) - strtotime('TODAY');
-
+            
             if ($projectHours >=  $calculatedHours) {
+                
 
                 if ($unpaidSeconds >= $calculatedHours) {
                     $task->paidLogs = date('H:i:s', strtotime($task->paidLogs) + $calculatedHours);
@@ -192,12 +195,14 @@ class InvoiceController extends Controller
                     }
                     $task->save();
                 }
+
+                // dd($this->secondsToTime($totalHours));
             } else {
                 $request->session()->flash('invoice', 'Your invoice amount exceed the due amount of the project. Please provide the amount equal to due amount or less than due amount.');
                 return redirect()->route('view.project', ['id' => $projectID]);
             }
         }
-        $invoiceId = $this->fixedAmountInvoiceEntry($project->project_name, $calculatedHours, $amount, $invoiceTitle);
+        $invoiceId = $this->fixedAmountInvoiceEntry($project->project_name, $totalHours, $amount, $invoiceTitle);
         if ($invoiceId) {
             $request->session()->flash('invoice', 'Invoice Created of Amount $' . $amount);
             return redirect()->route('view.project', ['id' => $projectID]);
@@ -352,6 +357,7 @@ class InvoiceController extends Controller
 
         // Format the result as HH:MM:SS
         $projectHours = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+        // dd($projectHours);
         $invoice = new Invoice();
         $invoice->project_name = $projectName;
         $invoice->date_created = Carbon::now();
