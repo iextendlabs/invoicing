@@ -268,10 +268,9 @@ class ClientController extends Controller
         // Assign hours and minutes, defaulting to 0 if not present
         $hours = isset($parts[0]) ? (int)$parts[0] : 0;
         $minutes = isset($parts[1]) ? (int)$parts[1] : 0;
-        $second = isset($parts[2]) ? (int)$parts[2] : 0;
         
         // Convert minutes to decimal hours
-        $decimalHours = $hours + ($minutes / 60) + ($minutes / 3600);
+        $decimalHours = $hours + ($minutes / 60);
         $formattedDecimalHours = number_format($decimalHours, 2);
         
         return $formattedDecimalHours;
