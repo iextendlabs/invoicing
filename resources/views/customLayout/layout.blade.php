@@ -19,18 +19,18 @@
 
         /* handle pagination front-end */
 
-        body > div > div.row.mt-3 > div > div > nav > div.hidden.sm\:flex-1.sm\:flex.sm\:items-center.sm\:justify-between > div:nth-child(2){
+        body>div>div.row.mt-3>div>div>nav>div.hidden.sm\:flex-1.sm\:flex.sm\:items-center.sm\:justify-between>div:nth-child(2) {
             display: none;
         }
 
-        body > div > div.row.mt-3 > div > div > nav > div.hidden.sm\:flex-1.sm\:flex.sm\:items-center.sm\:justify-between > div:nth-child(1){
+        body>div>div.row.mt-3>div>div>nav>div.hidden.sm\:flex-1.sm\:flex.sm\:items-center.sm\:justify-between>div:nth-child(1) {
             margin-top: 17px;
             margin-left: 12px;
             font-size: 16px;
             /* display: none; */
         }
 
-        body > div > div.row.mt-2 > div > nav > div.hidden.sm\:flex-1.sm\:flex.sm\:items-center.sm\:justify-between > div:nth-child(2){
+        body>div>div.row.mt-2>div>nav>div.hidden.sm\:flex-1.sm\:flex.sm\:items-center.sm\:justify-between>div:nth-child(2) {
             display: none;
         }
 
@@ -39,16 +39,15 @@
         .without_ampm::-webkit-datetime-edit-ampm-field {
             display: none;
         }
+
         input[type=time]::-webkit-clear-button {
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        -o-appearance: none;
-        -ms-appearance:none;
-        appearance: none;
-        margin: -10px; 
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            -o-appearance: none;
+            -ms-appearance: none;
+            appearance: none;
+            margin: -10px;
         }
-
-
     </style>
 </head>
 
@@ -56,59 +55,74 @@
 
     <div class="container-fluid">
         <div class="row">
-            
-            @yield('navbar')
-
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark w-100">
+                @yield('navbar')
+            </nav>
         </div>
-
+    </div>
+    <div class="container">
         @yield('main-content')
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
+        integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous">
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/script.js') }}"></script>
 
     <script>
-        $(function(){
+        $(function() {
             // $('#prntBtn').click(function(){
             //     window.print();
             //     // print specific div
             //     // $("#printPreview").print();
             // });
-            
+
             // Invoice Generate Buttons
             $('#fixedAmountForm').hide();
             $("#fixedHoursForm").hide();
             $("#dateForm").show();
 
             // fixed amount
-            $("#fixedAmount").click(function(){
-                $(this).css({'background-color':'blue', 'color':'white'});
+            $("#fixedAmount").click(function() {
+                $(this).css({
+                    'background-color': 'blue',
+                    'color': 'white'
+                });
                 $("#dateForm").hide();
                 $("#fixedHoursForm").hide();
                 $("#fixedAmountForm").show();
             });
 
             // date-wise invoice
-            $("#dateWiseInvoice").click(function(){
-                $(this).css({'background-color':'green', 'color':'white'});
+            $("#dateWiseInvoice").click(function() {
+                $(this).css({
+                    'background-color': 'green',
+                    'color': 'white'
+                });
                 $("#dateForm").show();
                 $("#fixedHoursForm").hide();
                 $("#fixedAmountForm").hide();
             });
 
             // fixed hours
-            $("#fixedHours").click(function(){
-                $(this).css({'background-color':'darkblue', 'color':'white'});
+            $("#fixedHours").click(function() {
+                $(this).css({
+                    'background-color': 'darkblue',
+                    'color': 'white'
+                });
                 $("#fixedHoursForm").show();
                 $("#fixedAmountForm").hide();
-                $("#dateForm").hide();                
+                $("#dateForm").hide();
             });
 
 
-            
+
         });
     </script>
 </body>

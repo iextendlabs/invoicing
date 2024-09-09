@@ -59,10 +59,7 @@ class ClientController extends Controller
             $hours =  $this->secondsToTime($paid);
             
             $logsPayment    =  $this->timeToDecimalHours( $paidHours) * $projectInfo->per_hour_rate;
-            // $logsPayment    =  str_replace(':', '.', $paidHours) * $projectInfo->per_hour_rate;
-
             $dueCharges     = $this->timeToDecimalHours( $unPaidHours) * $projectInfo->per_hour_rate;
-
             $totalCost      = $this->timeToDecimalHours( $hours) * $projectInfo->per_hour_rate;
 
             $projects_total[$key]['logsPayment'] = $logsPayment;
@@ -263,12 +260,13 @@ class ClientController extends Controller
         return sprintf('%02d:%02d', $hours, $minutes,);
     }
 
-    public function timeToDecimalHours($time) {
+    public function timeToDecimalHours($time)
+    {
         $parts = explode(':', $time);
         // Assign hours and minutes, defaulting to 0 if not present
         $hours = isset($parts[0]) ? (int)$parts[0] : 0;
         $minutes = isset($parts[1]) ? (int)$parts[1] : 0;
-        
+
         // Convert minutes to decimal hours
         $decimalHours = $hours + ($minutes / 60);
         $formattedDecimalHours = number_format($decimalHours, 2);

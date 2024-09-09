@@ -3,12 +3,18 @@
 @section('title', 'Invoice Management System')
 
 @section('navbar')
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark w-100">
-    <a href="{{ url()->previous() }}" class="nav-link text-light"><i class="bi bi-arrow-left-circle"></i></a>
-    <a class="navbar-brand" href="#">Admin | <small>Edit Task</small> </a>
-    <a href="{{ route('adminlogout') }}" class="nav-link ml-auto text-light">Logout</a>
-
-</nav>
+<a href="{{ url()->previous() }}" class="nav-link text-light"><i class="bi bi-arrow-left-circle"></i></a>
+<a class="navbar-brand" href="#">Admin | <small>Edit Task</small> </a>
+<div class="btn-group mx-auto d-md-inline d-none" role="group">
+    <a class="btn btn-outline-info" href="{{ route('admin/create-task') }}">Create Task</a>
+    <a class="btn btn-outline-info" href="{{ route('admin/create/project') }}">Create Project</a>
+    {{-- <a class="btn btn-outline-info" href="{{ route('admin/projects') }}">Available Projects</a> --}}
+    <a class="btn btn-outline-info" href="{{ route('create.task.log') }}">Create Task Log</a>
+    <a class="btn btn-outline-light" href="{{ route('create.user') }}">Create User</a>
+    <a class="btn btn-outline-primary" href="{{ route('work.detail') }}">Work Detail</a>
+    <a class="btn btn-outline-success" href="{{ route('change.admin.password') }}">Change Password</a>
+</div>
+<a href="{{ route('adminlogout') }}" class="nav-link ml-auto text-light">Logout</a>
 @endsection
 
 @section('main-content')

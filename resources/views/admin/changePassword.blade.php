@@ -10,7 +10,8 @@
         <span class="d-md-inline-block d-none">Invoice Management System | <small>Change Password</small></span>
         <span class="d-md-none">IMS | <small>Change Password</small></span>
     </a>
-    <a href="{{ route('user.logout') }}" class="nav-link ml-auto text-light" style="font-size: 18px;">Logout</a>
+    
+    <a href="{{ route('adminlogout') }}" class="nav-link ml-auto text-light" style="font-size: 18px;">Logout</a>
 </nav>
 @endsection
 

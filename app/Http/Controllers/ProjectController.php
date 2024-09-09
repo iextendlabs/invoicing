@@ -30,7 +30,6 @@ class ProjectController extends Controller
 
     public function createProjectPost(Request $request)
     {
-
         // validate the request
         // store info in db
         $data = $request->validate([
@@ -53,10 +52,7 @@ class ProjectController extends Controller
         $projectInfo    = Project::find($projectId);
         $tasks          = $projectInfo->task;
         $paidHours      = $this->paidHours($tasks);
-
         $unPaidHours    = $this->unPaidHours($tasks);
-
-
 
         $paid = 0;
         foreach ($tasks as $task) {
@@ -94,10 +90,8 @@ class ProjectController extends Controller
         return $taskTotalHour;
     }
 
-
     public function eachTaskUnpaidHours($tasks)
     {
-
         $arr = [];
         foreach ($tasks as $task) {
             $logs = TaskLog::where('task_id', $task->id)->where('log_status', 'pending')->get();
