@@ -61,7 +61,6 @@ class TaskLogController extends Controller
         $taskLog->save();
         if ($taskLog->save()) {
             $logDifference = $this->calculateDifference($request->starttime, $request->endtime);
-
             $logDifferenceInSeconds = $this->timeToSeconds($logDifference);
             $task = Task::find($request->task_id);
 
@@ -216,8 +215,6 @@ class TaskLogController extends Controller
         }
         // log update
         $task_Log  = TaskLog::find($request->logID);
-        $previousLogDifference = $this->calculateDifference($task_Log->start_time, $task_Log->end_time);
-        $previousLogDifferenceSec = $this->timeToSeconds($previousLogDifference);
         $logUpdate = $task_Log->update([
             'user_id'    => $request->developerName,
             'start_time' => $request->starttime,
@@ -225,13 +222,12 @@ class TaskLogController extends Controller
             'log_status' => $request->logStatus,
             'log_creation_date' => $request->date,
         ]);
-        
+
         $taskID     = TaskLog::where('id', $request->logID)->pluck('task_id');
         $projectID  = Task::find($taskID[0])->project->id;
 
 
         if ($logUpdate) {
-
             $logDifference = $this->calculateDifference($request->starttime, $request->endtime);
             $logDifferenceInSeconds = $this->timeToSeconds($logDifference);
             $task = Task::find($taskID[0]);
@@ -239,25 +235,27 @@ class TaskLogController extends Controller
             $paidLogsInSeconds = $this->timeToSeconds($task->paidLogs);
 
             if ($request->logStatus == "pending") {
-                if ($unPaidLogsInSeconds == 0){
-                    $totalUnpaidSeconds = $unPaidLogsInSeconds  + $logDifferenceInSeconds;
-                    $task->unPaidLogs = $this->secondsToTime($totalUnpaidSeconds);    
-                } else {
-                    $totalUnpaidSeconds = $unPaidLogsInSeconds - $previousLogDifferenceSec + $logDifferenceInSeconds;
-                    $task->unPaidLogs = $this->secondsToTime($totalUnpaidSeconds);
-                }
-
+                $totalUnpaidSeconds = $unPaidLogsInSeconds  + $logDifferenceInSeconds;
+                $task->unPaidLogs = $this->secondsToTime($totalUnpaidSeconds);
                 $task->totalHours = $this->secondsToTime($totalUnpaidSeconds + $paidLogsInSeconds);
-            } elseif ($request->logStatus == "complete") {
-                if ($unPaidLogsInSeconds == 0){
-                    $totalUnpaidSeconds = $unPaidLogsInSeconds  + $logDifferenceInSeconds;
-                    $task->unPaidLogs = $this->secondsToTime($totalUnpaidSeconds);    
-                } else {
-                    $totalUnpaidSeconds = $unPaidLogsInSeconds - $previousLogDifferenceSec + $logDifferenceInSeconds;
-                    $task->unPaidLogs = $this->secondsToTime($totalUnpaidSeconds);
-                }
 
+                if (($task->paidLogs !== $task->totalHours) && ($task->unPaidLogs !== '00:00:00')) {
+                    $task->payment_status = 'partialPaid';
+                }
+                if ($task->unPaidLogs == $task->totalHours) {
+                    $task->payment_status = 'unpaid';
+                }
+            } elseif ($request->logStatus == "complete") {
+                $totalUnpaidSeconds = $unPaidLogsInSeconds + $logDifferenceInSeconds;
+                $task->unPaidLogs = $this->secondsToTime($totalUnpaidSeconds);
                 $task->totalHours = $this->secondsToTime($totalUnpaidSeconds + $unPaidLogsInSeconds);
+
+                if (($task->paidLogs !== $task->totalHours) && ($task->unPaidLogs !== '00:00:00')) {
+                    $task->payment_status = 'partialPaid';
+                }
+                if ($task->unPaidLogs == $task->totalHours) {
+                    $task->payment_status = 'unpaid';
+                }
             }
 
             $task->save();

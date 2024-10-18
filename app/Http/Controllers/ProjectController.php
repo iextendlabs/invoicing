@@ -32,6 +32,7 @@ class ProjectController extends Controller
     {
         // validate the request
         // store info in db
+
         $data = $request->validate([
             'project_name' => 'required|min:5',
             'project_desc' => 'required|min:10',
@@ -39,6 +40,7 @@ class ProjectController extends Controller
             'per_hour_rate' => 'required|integer|min:1',
             'user_id' => 'required|integer'
         ]);
+
         $saveProjcet =  Project::create($data);
         if ($saveProjcet->save()) {
             $request->session()->flash('success', 'Project Added');
@@ -96,7 +98,6 @@ class ProjectController extends Controller
         foreach ($tasks as $task) {
             $logs = TaskLog::where('task_id', $task->id)->where('log_status', 'pending')->get();
             foreach ($logs as $log) {
-
                 $start  = new Carbon($log->start_time);
                 $end    = new Carbon($log->end_time);
                 $diff   = $start->diff($end)->format('%H:%i');
@@ -329,7 +330,6 @@ class ProjectController extends Controller
         // Convert minutes to decimal hours
         $decimalHours = $hours + ($minutes / 60);
         $formattedDecimalHours = number_format($decimalHours, 2);
-        
         return $formattedDecimalHours;
     }
 }
